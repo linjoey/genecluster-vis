@@ -1,0 +1,40 @@
+{
+  "name": "cyto-genecluster-vis",
+  "version": "0.0.1",
+  "description": "genecluster visual representation",
+  "main": "./src/index.js",
+  "dependencies": {
+    "d3": "^3.5.6"
+  },
+  "devDependencies": {
+    "browserify": "^11.0.0",
+    "browserify-shim": "^3.8.10",
+    "es6-promise": "^2.3.0",
+    "gulp": "^3.9.0",
+    "gulp-sourcemaps": "^1.5.2",
+    "gulp-uglify": "^1.2.0",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0"
+  },
+  "browserify": {
+    "transform": [
+      "browserify-shim"
+    ]
+  },
+  "browserify-shim": {
+    "d3": "global:d3"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://linjoey@github.com/linjoey/cyto-genecluster-vis.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/linjoey/cyto-genecluster-vis/issues"
+  },
+  "homepage": "https://github.com/linjoey/cyto-genecluster-vis#readme"
+}
