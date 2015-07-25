@@ -7,7 +7,7 @@ var ensemblsrc  = require('./ensembl-source.js')
   , gAxis       = require('./genome-axis.js')
   , cytoBands   = require('./cyto-bands.js')
 
-var GeneCluster = (function() {
+var browser = (function() {
 
   function _constructor(args) {
 
@@ -18,9 +18,9 @@ var GeneCluster = (function() {
       height : 250,
       specie : 'human',
       region : {
-        segment: '1',
+        segment: '22',
         start: '1',
-        stop: '10000000'
+        stop: '5000000'
       }
     }, args);
 
@@ -78,6 +78,6 @@ var GeneCluster = (function() {
   return _constructor;
 })();
 
-module.exports = GeneCluster;
+module.exports = browser;
 
 

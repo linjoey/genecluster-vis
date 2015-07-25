@@ -28,7 +28,7 @@ var cytoBands = (function() {
     , _bands    = null
     , _labels   = null
 
-  var BAND_HEIGHT = 25;
+  var BAND_HEIGHT = 22;
 
   function updateBands() {
     if (_bands) {
@@ -76,7 +76,7 @@ var cytoBands = (function() {
             c += '-' + d.density;
           }
           return c
-        })
+        });
 
       _bands = g.append('rect')
         .attr('height', BAND_HEIGHT);

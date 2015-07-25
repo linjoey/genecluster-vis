@@ -6,11 +6,11 @@ var gulp        = require('gulp')
   , uglify      = require('gulp-uglify')
   , sourcemaps  = require('gulp-sourcemaps');
 
-var PROJECT_NAME  = 'cyto-genecluster-vis'
+var PROJECT_NAME  = 'gene-cluster'
   , ENTRY_FILE    = './src/index.js'
-  , BUILD_FILE    = 'genecluster-vis.js'
-  , DIST_FILE     = 'genecluster-vis.min.js'
-  , DIST_FOLDER   = './dist';
+  , BUILD_FILE    =  PROJECT_NAME + '.js'
+  , DIST_FILE     =  PROJECT_NAME + '.min.js'
+  , DIST_FOLDER   = './';
 
 var b = browserify({
   entries: [ENTRY_FILE],

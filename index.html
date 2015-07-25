@@ -3,18 +3,30 @@
 <head lang="en">
   <meta charset="UTF-8">
   <title></title>
+  <link rel="stylesheet" href="src/gene-cluster.css"/>
 </head>
 <body>
 
 <div id="test"></div>
 <script src="node_modules/d3/d3.min.js"></script>
-<script src="dist/genecluster-vis.js"></script>
+<script src="gene-cluster.js"></script>
 
 <script>
-  var gc = require('cyto-genecluster-vis');
-  console.log(gc.version)
+  var cgv = require('gene-cluster');
+console.log(cgv.version)
+  var gc = new cgv({
+    target: '#test',
+    region:{
+      segment: 2,
+      start: 1,
+      stop: 5000000
+    }
+  }).render();
 
-  var p = gc.test().then(function(d){console.log(d)});
+//  d3.xml('http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=gene&term=1[chr]+AND+1[CHRPOS]:100000[CHRPOS]+AND+human[ORGAN]', function(e,d) {
+//    console.log(d);
+//  })
+
 
 
 </script>

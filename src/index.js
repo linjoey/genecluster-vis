@@ -1,17 +1,10 @@
 
 
 var d3 = require('d3');
-var GeneCluster = require('./gene-cluster.js')
+var browser = require('./browser.js')
 
+var geneclusterAPI = browser;
 
-var geneclusterAPI = {
-  version: '0.0.1',
-  GeneCluster: GeneCluster,
-  test: function() {
-    return new Promise(function(resolve, reject) {
-      resolve('test resolve');
-    });
-  }
-};
+geneclusterAPI.version = '0.0.1';
 
 module.exports = geneclusterAPI;
