@@ -1,13 +1,12 @@
 
 
 var d3 = require('d3');
-var genedata = require('./genedata.js');
+var GeneCluster = require('./gene-cluster.js')
 
-genedata.get('human','1','1','100000')
-  .then(function(d){console.log(d)});
 
 var geneclusterAPI = {
   version: '0.0.1',
+  GeneCluster: GeneCluster,
   test: function() {
     return new Promise(function(resolve, reject) {
       resolve('test resolve');
