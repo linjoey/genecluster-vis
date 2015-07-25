@@ -20,7 +20,7 @@ var GeneCluster = (function() {
       region : {
         segment: '1',
         start: '1',
-        stop: '248956422'
+        stop: '10000000'
       }
     }, args);
 
@@ -41,7 +41,7 @@ var GeneCluster = (function() {
         .x(xscale)
         .scaleExtent([1, 1000])
 
-      , svgCytoBands = cytoBands()
+      , svgCytoBands = cytoBands(undefined, options.width)
         .scale(xscale)
         .offset([0, yOffset + 1])
         .segment(options.region.segment)

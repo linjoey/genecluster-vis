@@ -1,8 +1,5 @@
 
-var d3        = require('d3')
-  , bandsData = require('./data/ideogram_9606_850.json')
-  , utils     = require('./utils.js');
-
+var bandsData = require('./data/ideogram_9606_850.json');
 
 function getBandsOnSegment(segment) {
   var filtered = [];
@@ -26,8 +23,12 @@ var cytoBands = (function() {
 
   var _segment  = '1'
     , _offset   = [0, 0]
+    , _width    = 0
     , _xscale   = null
     , _bands    = null
+    , _labels   = null
+
+  var BAND_HEIGHT = 25;
 
   function updateBands() {
     if (_bands) {
@@ -38,23 +39,37 @@ var cytoBands = (function() {
         .attr('y', 0)
         .attr('width', function (d) {
           return _xscale(d.bp_stop) - _xscale(d.bp_start);
+        });
+
+      _labels
+        .attr('x', function(d) {
+          var w = _xscale(d.bp_stop) - _xscale(d.bp_start);
+          var currentDomain = _xscale.domain();
+          if (w > _width && (d.bp_start < currentDomain[0] && d.bp_stop > currentDomain[1])) {
+            return _width / 2;
+          } else {
+            return (_xscale(d.bp_stop) + _xscale(d.bp_start)) / 2 - 10;
+          }
         })
     }
   }
 
-  var _cytoBands = function(selection) {
+  var _cytoBands = function(selection, width) {
+
+    if (width) {
+      _width = width;
+    }
+
     if (selection !== undefined) {
       var bandData = getBandsOnSegment(_segment);
 
       var g = selection
         .attr('transform', "translate(" + _offset[0] + "," + _offset[1] + ")")
+        .attr('class', 'genecluster-band')
         .selectAll('g')
         .data(bandData)
         .enter()
         .append('g')
-        .attr('class', 'genecluster-band')
-
-      _bands = g.append('rect')
         .attr('class', function(d) {
           var c =  d.stain;
           if (d.density) {
@@ -62,7 +77,16 @@ var cytoBands = (function() {
           }
           return c
         })
-        .attr('height', 25)
+
+      _bands = g.append('rect')
+        .attr('height', BAND_HEIGHT);
+
+      _labels = g.append('text')
+        .text(function(d) {
+          return d.arm + d.band;
+        })
+        .attr('y', (BAND_HEIGHT/2) + 4);
+
 
       updateBands();
 
