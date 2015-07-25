@@ -2,9 +2,7 @@
 var d3          = require('d3')
   , assign      = require('lodash.assign')
 
-var ensemblsrc  = require('./ensembl-source.js')
-  , utils       = require('./utils.js')
-  , bAxis       = require('./browser-axis.js')
+var bAxis       = require('./browser-axis.js')
   , bBands   = require('./browser-bands.js')
 
 var browser = (function() {

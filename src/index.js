@@ -1,7 +1,7 @@
 
 
 var d3 = require('d3');
-var browser = require('./browser.js')
+var browser = require('./core/browser.js');
 
 var geneclusterAPI = browser;
 

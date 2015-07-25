@@ -1,5 +1,5 @@
 
-var bandsData = require('./data/ideogram_9606_850.json');
+var bandsData = require('../data/ideogram_9606_850.json');
 
 function getBandsOnSegment(segment) {
   var filtered = [];
