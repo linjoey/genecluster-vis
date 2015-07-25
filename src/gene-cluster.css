@@ -19,33 +19,39 @@
   stroke: #000000;
 }
 
-.genecluster-band .gpos-100 {
+.genecluster-band .gpos-100 text,
+.genecluster-band .gpos-75 text,
+.genecluster-band .gpos-50 text{
+  fill: white;
+}
+
+.genecluster-band .gpos-100 rect {
   fill: #000000;
 }
 
-.genecluster-band .gpos-75 {
+.genecluster-band .gpos-75 rect {
   fill: #666666;
 }
 
-.genecluster-band .gpos-50 {
+.genecluster-band .gpos-50 rect {
   fill: #999999;
 }
 
-.genecluster-band .gpos-25 {
+.genecluster-band .gpos-25 rect {
   fill: #d9d9d9;
 }
 
-.genecluster-band .gneg {
+.genecluster-band .gneg rect {
   fill: #ffffff;
 }
-.genecluster-band .gvar {
+.genecluster-band .gvar rect {
   fill: #e0e0e0;
 }
-.genecluster-band .acen {
+.genecluster-band .acen rect {
   fill: #708090;
 }
 
-.genecluster-band .stalk {
+.genecluster-band .stalk rect {
   fill: #708090;
 }
 
