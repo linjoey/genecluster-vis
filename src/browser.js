@@ -4,8 +4,8 @@ var d3          = require('d3')
 
 var ensemblsrc  = require('./ensembl-source.js')
   , utils       = require('./utils.js')
-  , gAxis       = require('./genome-axis.js')
-  , cytoBands   = require('./cyto-bands.js')
+  , bAxis       = require('./browser-axis.js')
+  , bBands   = require('./browser-bands.js')
 
 var browser = (function() {
 
@@ -29,10 +29,10 @@ var browser = (function() {
       , svgTarget = null
 
       , xscale = d3.scale.linear()
-        .domain([options.region.start, options.region.stop])
+        .domain([options.region.start - 100000, options.region.stop + 20000])
         .range([0, options.width])
 
-      , svgTopAxis = gAxis()
+      , svgTopAxis = bAxis()
         .height(options.height)
         .offset([0, yOffset])
         .scale(xscale)
@@ -41,7 +41,7 @@ var browser = (function() {
         .x(xscale)
         .scaleExtent([1, 1000])
 
-      , svgCytoBands = cytoBands(undefined, options.width)
+      , svgCytoBands = bBands(undefined, options.width)
         .scale(xscale)
         .offset([0, yOffset + 1])
         .segment(options.region.segment)
