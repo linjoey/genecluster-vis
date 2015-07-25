@@ -5,6 +5,7 @@ var d3          = require('d3')
 var ensemblsrc  = require('./ensembl-source.js')
   , utils       = require('./utils.js')
   , gAxis       = require('./genome-axis.js')
+  , cytoBands   = require('./cyto-bands.js')
 
 var GeneCluster = (function() {
 
@@ -14,32 +15,38 @@ var GeneCluster = (function() {
       //default options
       target : null,
       width : 1000,
-      height : 400,
+      height : 250,
       specie : 'human',
       region : {
-        chr: '1',
+        segment: '1',
         start: '1',
-        stop: '100000'
+        stop: '248956422'
       }
     }, args);
 
     var domTarget = options.target ? d3.select(options.target) : d3.selection()
+      , yOffset = 25
       , svgTarget = null
 
       , xscale = d3.scale.linear()
         .domain([options.region.start, options.region.stop])
         .range([0, options.width])
 
-      , topAxis = gAxis()
+      , svgTopAxis = gAxis()
         .height(options.height)
+        .offset([0, yOffset])
         .scale(xscale)
 
       , zoomBehaviour = d3.behavior.zoom()
         .x(xscale)
         .scaleExtent([1, 1000])
 
+      , svgCytoBands = cytoBands()
+        .scale(xscale)
+        .offset([0, yOffset + 1])
+        .segment(options.region.segment)
 
-    this.render = function() {
+      this.render = function() {
       domTarget
           .style('width', options.width + 'px')
           .style('height', options.height + 'px')
@@ -56,11 +63,15 @@ var GeneCluster = (function() {
 
       svgTarget
         .append('g')
-        .call(topAxis);
+        .call(svgTopAxis);
+
+      svgTarget.append('g')
+        .call(svgCytoBands);
     };
 
     this.update = function() {
-      topAxis.update();
+      svgTopAxis.update();
+      svgCytoBands.update();
     }
   }
 

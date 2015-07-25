@@ -13,3 +13,39 @@
   stroke: #bbcddd;
   stroke-width: 1px;
 }
+
+.genecluster-band rect {
+  stroke-width: 0.2px;
+  stroke: #000000;
+}
+
+.genecluster-band .gpos-100 {
+  fill: #000000;
+}
+
+.genecluster-band .gpos-75 {
+  fill: #666666;
+}
+
+.genecluster-band .gpos-50 {
+  fill: #999999;
+}
+
+.genecluster-band .gpos-25 {
+  fill: #d9d9d9;
+}
+
+.genecluster-band .gneg {
+  fill: #ffffff;
+}
+.genecluster-band .gvar {
+  fill: #e0e0e0;
+}
+.genecluster-band .acen {
+  fill: #708090;
+}
+
+.genecluster-band .stalk {
+  fill: #708090;
+}
+
