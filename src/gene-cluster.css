@@ -1,0 +1,15 @@
+
+.genecluster-vis text{
+  font: 12px sans-serif;
+}
+
+.genecluster-topaxis path {
+  stroke: #d4d4d4;
+  fill: none;
+  shape-rendering: crispEdges;
+}
+
+.genecluster-topaxis line {
+  stroke: #bbcddd;
+  stroke-width: 1px;
+}
