@@ -30,8 +30,11 @@ var GeneCluster = (function() {
         .domain([options.region.start, options.region.stop])
         .range([0, options.width])
 
-    this.render = function() {
+      , topAxis = gAxis()
+        .height(options.height)
+        .scale(xscale);;
 
+    this.render = function() {
       domTarget
           .style('width', options.width + 'px')
           .style('height', options.height + 'px')
@@ -45,52 +48,18 @@ var GeneCluster = (function() {
 
       var zoomBehaviour = d3.behavior.zoom()
         .x(xscale)
-        .scaleExtent([1, 1000]);
+        .scaleExtent([1, 1000])
+        .on('zoom', this.update);
 
-      zoomBehaviour.on('zoom', zoom);
-
-      var container = svgTarget.append('g')
       svgTarget.call(zoomBehaviour);
 
-      var rect = container.append('rect')
-        .datum({start: 5000, stop:20000})
-        .attr('height', 10)
-        .attr('y', 30)
-
-      updateRect();
-
-      function updateRect() {
-        rect.attr('width', function(d) {
-          return xscale(d.stop) - xscale(d.start);
-        })
-          .attr('x', function(d) {
-            return xscale(d.start);
-          })
-
-      }
-
-      var topAxis = gAxis()
-        .height(options.height)
-        .scale(xscale);
-
-      var axisG = svgTarget
+      svgTarget
         .append('g')
         .call(topAxis);
-      console.log('nah', xscale.domain())
-      console.log(zoomBehaviour.translate())
-      function zoom () {
-        console.log(zoomBehaviour.translate())
-        if (xscale.domain()[0] > -5000) {
-          updateRect()
-          topAxis.update();
-          console.log('nah', xscale.domain())
-
-        } else {
-          console.log('nah', xscale.domain())
-        }
-
-      }
-
+    };
+    
+    this.update = function() {
+      topAxis.update();
     }
   }
 
