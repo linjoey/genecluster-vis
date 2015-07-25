@@ -4,7 +4,7 @@ var d3          = require('d3')
 
 var ensemblsrc  = require('./ensembl-source.js')
   , utils       = require('./utils.js')
-  , gAxis        = require('./genome-axis.js')
+  , gAxis       = require('./genome-axis.js')
 
 var GeneCluster = (function() {
 
@@ -32,7 +32,12 @@ var GeneCluster = (function() {
 
       , topAxis = gAxis()
         .height(options.height)
-        .scale(xscale);;
+        .scale(xscale)
+
+      , zoomBehaviour = d3.behavior.zoom()
+        .x(xscale)
+        .scaleExtent([1, 1000])
+
 
     this.render = function() {
       domTarget
@@ -46,18 +51,14 @@ var GeneCluster = (function() {
         .attr('width', options.width)
         .attr('height', options.height);
 
-      var zoomBehaviour = d3.behavior.zoom()
-        .x(xscale)
-        .scaleExtent([1, 1000])
-        .on('zoom', this.update);
-
       svgTarget.call(zoomBehaviour);
+      zoomBehaviour.on('zoom', this.update);
 
       svgTarget
         .append('g')
         .call(topAxis);
     };
-    
+
     this.update = function() {
       topAxis.update();
     }

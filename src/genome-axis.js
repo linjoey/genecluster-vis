@@ -2,11 +2,8 @@
 var d3 = require('d3');
 
 var gAxis = (function() {
-
   var _d3axis = d3.svg.axis().orient('top');
-
   var _height = 0;
-
   var PADDING = 25;
 
   function updateTickLines(selection) {
@@ -15,7 +12,6 @@ var gAxis = (function() {
   }
 
   var _axis = function(selection) {
-
     if (selection !== undefined) {
       selection
         .attr('transform', "translate(0," + PADDING + ")")
@@ -23,17 +19,14 @@ var gAxis = (function() {
         .call(_d3axis)
         .call(updateTickLines)
     }
-
     _axis.update = function() {
       selection.call(_d3axis);
       _axis.adjustTickLine();
       return _axis;
     };
-
     _axis.adjustTickLine = function() {
       selection.call(updateTickLines)
     };
-
     return _axis;
   };
 
