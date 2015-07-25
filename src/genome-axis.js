@@ -2,11 +2,15 @@
 var d3 = require('d3');
 
 var gAxis = (function() {
-  var _d3axis = d3.svg.axis().orient('top')
+  var _d3axis = d3.svg.axis()
+      .orient('top')
+      .ticks(14)
+      .tickFormat(d3.format('s'))
     , _height = 0
     , _offset  = [0, 0]; //[x, y] shift from parent
 
   function updateTickLines(selection) {
+    var t = _d3axis.ticks();
     selection.selectAll('.tick').select('line')
       .attr('y2', _height - _offset[1]);
   }
