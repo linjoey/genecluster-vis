@@ -56,6 +56,7 @@ var browser = (function() {
 
       svgTarget = domTarget
         .append('svg')
+        .attr('xmlns', 'http://www.w3.org/2000/svg')
         .attr('class', 'genecluster-vis')
         .attr('width', options.width)
         .attr('height', options.height);
