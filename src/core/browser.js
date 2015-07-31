@@ -18,8 +18,8 @@ var browser = (function() {
       specie : 'human',
       region : {
         segment: '7',
-        start: '114086300',
-        stop: '114693760'
+        start: '114396300',
+        stop: '114593760'
       }
     }, args);
 
@@ -28,7 +28,7 @@ var browser = (function() {
       , svgTarget = null
 
       , xscale = d3.scale.linear()
-        .domain([+options.region.start - 100000, +options.region.stop + 20000])
+        .domain([+options.region.start, +options.region.stop])
         .range([0, options.width])
 
       , svgTopAxis = bAxis()
@@ -62,6 +62,7 @@ var browser = (function() {
 
       svgTarget.call(zoomBehaviour);
       zoomBehaviour.on('zoom', _this.update);
+      zoomBehaviour.on('zoomend', _this.updateend)
 
       svgTarget
         .append('g')
@@ -80,6 +81,10 @@ var browser = (function() {
       svgCytoBands.update();
       svgGenes.update();
     };
+
+    _this.updateend = function() {
+      svgGenes.updateend();
+    }
   }
 
   return _constructor;

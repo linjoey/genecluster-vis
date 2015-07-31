@@ -14,7 +14,8 @@ var genetrack = function(xscale) {
     , _geneSummaryManager = new GeneManager()
     , _selection;
 
-  var genes;
+  var genesGroup;
+  var outGenes;
 
   var _gt = function(selection) {
 
@@ -44,24 +45,23 @@ var genetrack = function(xscale) {
             data[i].track = trackNum;
           }
 
-          console.log('san',data);
-          var genesGroup = _selection.selectAll('.gene')
+          genesGroup = _selection.selectAll('.gene')
             .data(data, function(d) { return d.$.uid })
 
-          //update genes
-
-          genes = genesGroup.enter()
+          var genesEnter = genesGroup.enter()
             .append('g')
-            .attr('class', 'gene')
-            .append('rect')
+            .attr('class', 'gene');
 
+            genesEnter.append('rect')
             .attr('y', function(d) {
-              return (20 * d.track) + 22
+              return (20 * d.track) + 20;
             })
-            .attr('height', 20)
-            .on('mouseover', function(d) {
-              console.log(d.NomenclatureSymbol);
-            })
+            .attr('height', 10)
+
+          genesEnter.append('title')
+            .text(function(d) {return d.Name; })
+
+          outGenes = genesGroup.exit();
 
           _gt.update();
 
@@ -78,18 +78,30 @@ var genetrack = function(xscale) {
 
 
   _gt.update = function() {
-    genes.attr('x', function (d) {
-      return xscale(+d.ChrStart);
-    })
-      .attr('width', function (d) {
-        var ginfo = d.GenomicInfo.GenomicInfoType;
 
-        if (ginfo.ChrStart > ginfo.ChrStop) {
-          return xscale(+ginfo.ChrStart) - xscale(+ginfo.ChrStop);
-        } else {
-          return xscale(+ginfo.ChrStop) - xscale(+ginfo.ChrStart);
-        }
-      })
+    function applyUpdate() {
+      this.select('rect')
+        .attr('x', function (d) {
+          return xscale(+d.ChrStart);
+        }).attr('width', function (d) {
+          var ginfo = d.GenomicInfo.GenomicInfoType;
+
+          if (ginfo.ChrStart > ginfo.ChrStop) {
+            return xscale(+ginfo.ChrStart) - xscale(+ginfo.ChrStop);
+          } else {
+            return xscale(+ginfo.ChrStop) - xscale(+ginfo.ChrStart);
+          }
+        })
+    }
+
+    applyUpdate.call(genesGroup)
+    applyUpdate.call(outGenes)
+  }
+
+  _gt.updateend = function() {
+    var ext = xscale.domain();
+    console.log('ext',ext)
+    drawGeneSummariesAt(ext[0], ext[1]);
   }
 
   _gt.locus = function(newChr, newStart, newStop) {

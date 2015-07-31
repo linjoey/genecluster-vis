@@ -14,7 +14,8 @@ var PROJECT_NAME  = 'genecluster-vis'
   , DIST_FOLDER   = './'
   , STYLE_OUT     = PROJECT_NAME + '.css'
   , STYLE_SOURCES = [
-    './src/core/browser-styles.css'
+    './src/core/browser-styles.css',
+    './src/gene-track-styles.css'
   ];
 
 var b = browserify({
