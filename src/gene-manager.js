@@ -28,6 +28,11 @@ var GeneManager = (function() {
 // Register a gene location
 // Return its available track to display
   _constructor.prototype.register = function (gene) {
+
+    if (gene.stop < gene.start) {
+      gene.stop = [gene.start, gene.start = gene.stop][0];
+    }
+
     var trackNo = this.findFreeTrack(gene.start, gene.stop);
 
     if (typeof this.db[trackNo] === 'undefined') {
