@@ -38,7 +38,7 @@ var browser = (function() {
 
       , zoomBehaviour = d3.behavior.zoom()
         .x(xscale)
-        .scaleExtent([1, 1200])
+        .scaleExtent([0.5, 50])
 
       , svgCytoBands = bBands(undefined, options.width)
         .scale(xscale)
