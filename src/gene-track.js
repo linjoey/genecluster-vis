@@ -78,11 +78,15 @@ var genetrack = function(xscale) {
             .append('g')
             .attr('class', 'gene');
 
-            genesEnter.append('path')
+          genesEnter.append('path')
             //.attr('y', function(d) {
             //  return (20 * d.track) + 20;
             //})
             //.attr('height', 10)
+
+          genesEnter.append('text')
+            .attr('y', function(d) { return (35 * d.track) + 20;})
+            .text(function(d){ return d.Name; })
 
           genesEnter.append('title')
             .text(function(d) {return d.Name; })
@@ -131,11 +135,14 @@ var genetrack = function(xscale) {
           width = xscale(+ginfo.ChrStop) - xscale(+ginfo.ChrStart);
         }
         var x = xscale(+d.ChrStart);
-        var y = (35 * d.track) + 30;
+        var y = (40 * d.track) + 30;
         var isUpStream = (ginfo.ChrStart < ginfo.ChrStop) ? true : false;
 
         return encodeGeneShape(isUpStream, x, y, width, 15);
       })
+
+    this.select('text')
+      .attr('x', function(d) { return xscale(+d.ChrStart);})
   }
 
   _gt.update = function() {
