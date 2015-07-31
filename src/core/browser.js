@@ -1,24 +1,25 @@
 
-var d3          = require('d3')
-  , assign      = require('lodash.assign')
+var d3         = require('d3')
+  , assign     = require('lodash.assign');
 
-var bAxis       = require('./browser-axis.js')
-  , bBands   = require('./browser-bands.js')
+var bAxis      = require('./browser-axis.js')
+  , bBands     = require('./browser-bands.js')
+  , genesTrack = require('../gene-track.js')
 
 var browser = (function() {
-
   function _constructor(args) {
-
+    var _this = this;
     var options = assign({
       //default options
       target : null,
-      width : 1000,
+      width : 1200,
       height : 250,
+      gene: 'foxp2',
       specie : 'human',
       region : {
-        segment: '22',
-        start: '1',
-        stop: '5000000'
+        segment: '7',
+        start: '114086300',
+        stop: '114693760'
       }
     }, args);
 
@@ -27,7 +28,7 @@ var browser = (function() {
       , svgTarget = null
 
       , xscale = d3.scale.linear()
-        .domain([options.region.start - 100000, options.region.stop + 20000])
+        .domain([+options.region.start - 100000, +options.region.stop + 20000])
         .range([0, options.width])
 
       , svgTopAxis = bAxis()
@@ -37,18 +38,21 @@ var browser = (function() {
 
       , zoomBehaviour = d3.behavior.zoom()
         .x(xscale)
-        .scaleExtent([1, 1000])
+        .scaleExtent([1, 1200])
 
       , svgCytoBands = bBands(undefined, options.width)
         .scale(xscale)
         .offset([0, yOffset + 1])
         .segment(options.region.segment)
 
-      this.render = function() {
+      , svgGenes = genesTrack(xscale)
+        .locus(options.region.segment, options.region.start, options.region.stop);
+
+    _this.render = function () {
       domTarget
-          .style('width', options.width + 'px')
-          .style('height', options.height + 'px')
-          .style('border', '1px solid #BDBDBD');
+        .style('width', options.width + 'px')
+        .style('height', options.height + 'px')
+        .style('border', '1px solid #BDBDBD');
 
       svgTarget = domTarget
         .append('svg')
@@ -57,7 +61,7 @@ var browser = (function() {
         .attr('height', options.height);
 
       svgTarget.call(zoomBehaviour);
-      zoomBehaviour.on('zoom', this.update);
+      zoomBehaviour.on('zoom', _this.update);
 
       svgTarget
         .append('g')
@@ -65,12 +69,17 @@ var browser = (function() {
 
       svgTarget.append('g')
         .call(svgCytoBands);
+
+      svgTarget.append('g')
+        .attr('transform', "translate(0," + (yOffset + 24) + ")")
+        .call(svgGenes);
     };
 
-    this.update = function() {
+    _this.update = function () {
       svgTopAxis.update();
       svgCytoBands.update();
-    }
+      svgGenes.update();
+    };
   }
 
   return _constructor;

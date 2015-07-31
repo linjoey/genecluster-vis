@@ -4,7 +4,7 @@ var d3 = require('d3');
 var gAxis = (function() {
   var _d3axis = d3.svg.axis()
       .orient('top')
-      .ticks(14)
+      //.ticks(12)
       .tickFormat(d3.format('s'))
     , _height = 0
     , _offset  = [0, 0]; //[x, y] shift from parent

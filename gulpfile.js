@@ -7,7 +7,7 @@ var gulp        = require('gulp')
   , concat      = require('gulp-concat')
   , sourcemaps  = require('gulp-sourcemaps');
 
-var PROJECT_NAME  = 'gene-cluster'
+var PROJECT_NAME  = 'genecluster-vis'
   , ENTRY_FILE    = './src/index.js'
   , BUILD_FILE    =  PROJECT_NAME + '.js'
   , DIST_FILE     =  PROJECT_NAME + '.min.js'
