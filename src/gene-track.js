@@ -81,29 +81,31 @@ var genetrack = function(xscale) {
       });
   }
 
+  function applyUpdate() {
+    this.select('rect')
+      .attr('x', function (d) {
+        return xscale(+d.ChrStart);
+      }).attr('width', function (d) {
+        var ginfo = d.GenomicInfo.GenomicInfoType;
+
+        var w = 0;
+        if (ginfo.ChrStart > ginfo.ChrStop) {
+          w = xscale(+ginfo.ChrStart) - xscale(+ginfo.ChrStop);
+        } else {
+          w = xscale(+ginfo.ChrStop) - xscale(+ginfo.ChrStart);
+        }
+
+        return (w && w >=0) ? w : 0;
+      })
+  }
 
   _gt.update = function() {
 
-    function applyUpdate() {
-      this.select('rect')
-        .attr('x', function (d) {
-          return xscale(+d.ChrStart);
-        }).attr('width', function (d) {
-          var ginfo = d.GenomicInfo.GenomicInfoType;
-
-          if (ginfo.ChrStart > ginfo.ChrStop) {
-            return xscale(+ginfo.ChrStart) - xscale(+ginfo.ChrStop);
-          } else {
-            return xscale(+ginfo.ChrStop) - xscale(+ginfo.ChrStart);
-          }
-        })
-    }
-
     applyUpdate.call(genesGroup)
-    applyUpdate.call(outGenes)
   }
 
   _gt.updateend = function() {
+    applyUpdate.call(outGenes);
     var ext = xscale.domain();
 
     //dont make request on old areas or zooming in
