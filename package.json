@@ -1,11 +1,12 @@
 {
-  "name": "gene-cluster",
+  "name": "genecluster-vis",
   "version": "0.0.1",
   "description": "genecluster visual representation",
   "main": "./src/index.js",
   "dependencies": {
     "d3": "^3.5.6",
-    "lodash.assign": "^3.2.0"
+    "lodash.assign": "^3.2.0",
+    "ncbi-eutils": "^0.2.1"
   },
   "devDependencies": {
     "browserify": "^11.0.0",
