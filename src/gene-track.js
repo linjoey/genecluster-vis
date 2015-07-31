@@ -33,6 +33,11 @@ var genetrack = function(xscale) {
     return eutils.esearch({db:'gene', term: q})
       .then(eutils.esummary)
       .then(function(data) {
+
+        if ((typeof data.eSummaryResult.ERROR !== 'undefined')) {
+          return
+        }
+
         data = data.eSummaryResult.DocumentSummarySet.DocumentSummary;
         if (data.constructor === Array) {
           for (var i = 0; i < data.length; i++) {
@@ -100,14 +105,23 @@ var genetrack = function(xscale) {
 
   _gt.updateend = function() {
     var ext = xscale.domain();
-    console.log('ext',ext)
-    drawGeneSummariesAt(ext[0], ext[1]);
-  }
+
+    //dont make request on old areas or zooming in
+    if (ext[0] < _bufferedStart || ext[1] > _bufferedStop) {
+      var start = ext[0] < _bufferedStart ? ext[0] : _bufferedStart;
+      var stop = ext[1] > _bufferedStop ? ext[1] : _bufferedStop;
+
+      _bufferedStart = start;
+      _bufferedStop = stop;
+
+      drawGeneSummariesAt(start, stop);
+    }
+  };
 
   _gt.locus = function(newChr, newStart, newStop) {
     _chr = newChr;
-    _start = newStart;
-    _stop = newStop;
+    _bufferedStart = _start = newStart;
+    _bufferedStop = _stop = newStop;
     return _gt;
   };
 
