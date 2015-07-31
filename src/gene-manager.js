@@ -5,13 +5,18 @@ var GeneManager = (function() {
     this.db = [];
   };
 
-  _constructor.prototype.findFreeTrack = function(start, stop) {
+  _constructor.prototype.findFreeTrack = function(uid, start, stop) {
     var trackNo = 0;
     var collide;
     for (var i = 0; i < this.db.length; i++) {
       collide = false;
       for (var j = 0; j < this.db[i].length; j++) {
         var gene = this.db[i][j];
+
+        if (gene.uid === uid) {
+          return trackNo;
+        }
+
         if (gene.stop >= start && gene.start <= stop) {
           trackNo++;
           collide = true;
@@ -33,7 +38,7 @@ var GeneManager = (function() {
       gene.stop = [gene.start, gene.start = gene.stop][0];
     }
 
-    var trackNo = this.findFreeTrack(gene.start, gene.stop);
+    var trackNo = this.findFreeTrack(gene.uid, gene.start, gene.stop);
 
     if (typeof this.db[trackNo] === 'undefined') {
       this.db[trackNo] = [];
