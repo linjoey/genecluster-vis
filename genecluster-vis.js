@@ -15013,7 +15013,7 @@ var browser = (function() {
       specie : 'human',
       region : {
         segment: '7',
-        start: '114386300',
+        start: '114396300',
         stop: '114593760'
       }
     }, args);
@@ -23832,7 +23832,7 @@ var genetrack = function(xscale) {
         }
 
         data = data.eSummaryResult.DocumentSummarySet.DocumentSummary;
-console.log(data)
+
         if (data.constructor === Array) {
           for (var i = 0; i < data.length; i++) {
             var trackNum = _geneSummaryManager
