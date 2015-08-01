@@ -16,13 +16,11 @@
 console.log(cgv.version)
   var gc = new cgv({
     target: '#test',
-    gene: 'foxp2',
-    specie: 'human',
-//    region:{
-//      segment: 2,
-//      start: 1,
-//      stop: 5000000
-//    }
+    region : {
+      segment: '1',
+      start: '114386300',
+      stop: '114513760'
+    }
   }).render();
 
 //  d3.xml('http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=gene&term=1[chr]+AND+1[CHRPOS]:100000[CHRPOS]+AND+human[ORGAN]', function(e,d) {

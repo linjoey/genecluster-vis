@@ -15,7 +15,12 @@
   var cgv = require('genecluster-vis');
 console.log(cgv.version)
   var gc = new cgv({
-    target: '#test'
+    target: '#test',
+    region : {
+      segment: '1',
+      start: '114386300',
+      stop: '114513760'
+    }
   }).render();
 
 </script>

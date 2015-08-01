@@ -1,0 +1,63 @@
+
+.genecluster-vis text{
+  font: 12px sans-serif;
+}
+
+.genecluster-topaxis path {
+  stroke: #d4d4d4;
+  fill: none;
+  shape-rendering: crispEdges;
+}
+
+.genecluster-topaxis line {
+  stroke: #bbcddd;
+  stroke-width: 1px;
+}
+
+.genecluster-band rect {
+  stroke-width: 0.2px;
+  stroke: #000000;
+}
+
+.genecluster-band .stalk text,
+.genecluster-band .gpos-100 text,
+.genecluster-band .gpos-75 text,
+.genecluster-band .gpos-50 text{
+  fill: white;
+}
+
+.genecluster-band .gpos-100 rect {
+  fill: #000000;
+}
+
+.genecluster-band .gpos-75 rect {
+  fill: #666666;
+}
+
+.genecluster-band .gpos-50 rect {
+  fill: #999999;
+}
+
+.genecluster-band .gpos-25 rect {
+  fill: #d9d9d9;
+}
+
+.genecluster-band .gneg rect {
+  fill: #ffffff;
+}
+.genecluster-band .gvar rect {
+  fill: #e0e0e0;
+}
+.genecluster-band .acen rect {
+  fill: #708090;
+}
+
+.genecluster-band .stalk rect {
+  fill: #708090;
+}
+
+
+.gene path {
+  fill: #325461;
+}
+

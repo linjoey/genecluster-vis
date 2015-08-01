@@ -7,6 +7,17 @@
 </head>
 <body>
 
+<svg width="1000" height="600">
+  <g id="svg">
+    <!--<path d="M150 100 l25 -25 h325 v50 h-325 z", fill="red" stroke="black" stroke-width="2"></path>-->
+
+    <path d="M150 300 v-50 h300 l 50 50 l -50 50 h-300 z" fill="red" stroke="black" stroke-width="2"></path>
+
+    <circle fill="red" r="1" cx="150" cy ="100"></circle>
+  </g>
+
+</svg>
+
 <div id="test"></div>
 <script src="node_modules/d3/d3.min.js"></script>
 <!--<script src="genecluster-vis.js"></script>-->
@@ -14,27 +25,43 @@
 
 <script>
 
-  var eutils = require('ncbi-eutils')
 
-  eutils.esearch({db:'gene', term:'7[CHR] AND 114086300[CPOS]:114693760[CPOS] AND human[orgn]'})
-    .then(eutils.esummary)
-    .then(function(d){
-      console.log(d)
-    })
+  function downstream(upstream, x, y, width, height) {
+    var h = (width - (height/2)) > 0 ? (width - (height/2)) : 0;
+    var lx = (width >= height/2) ? height / 2 : width;
 
-//  eutils.esearch({db:'gene', term:'7[CHR] AND 114086300[CPOS]:114693760[CPOS] AND human[orgn]'})
-//    .then(eutils.efetch)
-//    .then(function(d){
-//      console.log(d)
-//    })
+    if (upstream) {
+      return "M" + x + " " + y +
+        " l" + lx + " -" + (height/2) +
+        " h" +  h +
+        " v" + (height) +
+        " h-" + h + " z";
+    } else {
+      return "M" + (x + width) + " " + y +
+        " l-" + lx + " -" + (height/2) +
+        " h-" + h +
+        " v" + height +
+        " h" + h + " z";
 
-  eutils.esearch({db:'gene', term:'lft[sym] AND human[orgn]'})
-    .then(eutils.esummary)
-    .then(function(d){
-      console.log(d)
-    })
+    }
+  }
 
-  //Entrezgene.Entrezgene_locus[0].Gene-commentary_producsts = []...
+  function upstream(x, y, width, height) {
+
+    var h = (width - (height/2)) > 0 ? (width - (height/2)) : 0;
+    var lx = (width >= height/2) ? height / 2 : width;
+
+
+  }
+
+  console.log()
+
+  d3.select('#svg')
+    .append('path')
+    .attr('stroke', 'black')
+    .attr('stroke-width', '2')
+    .attr('d', upstream(150, 100, 10, 40))
+
 
 
 </script>
