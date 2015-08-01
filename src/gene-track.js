@@ -85,7 +85,7 @@ var genetrack = function(xscale) {
             //.attr('height', 10)
 
           genesEnter.append('text')
-            .attr('y', function(d) { return (35 * d.track) + 20;})
+            .attr('y', function(d) { return (40 * d.track) + 20;})
             .text(function(d){ return d.Name; })
 
           genesEnter.append('title')
