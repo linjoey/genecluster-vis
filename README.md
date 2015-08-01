@@ -1,5 +1,13 @@
-# gene-cluster
+# genecluster-vis
 
-# agenda
-- []  better band label placement algorithm 
-- []  inline styles via code vs a css file?
+> Interactive gene cluster visual representation for the web
+
+![0.0.1 screencap](ss.png)
+### Demo
+For a live demo visit here:
+http://linjoey.github.io/genecluster-vis/
+### API
+**under development
+
+### License
+MIT

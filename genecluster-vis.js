@@ -8794,304 +8794,6 @@ function isNative(value) {
 module.exports = isArray;
 
 },{}],52:[function(require,module,exports){
-module.exports={
-  "name": "ncbi-eutils",
-  "version": "0.2.2",
-  "description": "NCBI E-utilities API for JavaScript (Node + Browser)",
-  "main": "src/index.js",
-  "scripts": {
-    "test": "gulp test"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://linjoey@github.com/linjoey/ncbi-eutils.git"
-  },
-  "author": "",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/linjoey/ncbi-eutils/issues"
-  },
-  "homepage": "https://github.com/linjoey/ncbi-eutils#readme",
-  "devDependencies": {
-    "browserify": "^11.0.0",
-    "gulp": "^3.9.0",
-    "gulp-concat": "^2.6.0",
-    "gulp-mocha": "^2.1.3",
-    "gulp-sourcemaps": "^1.5.2",
-    "gulp-uglify": "^1.2.0",
-    "vinyl-buffer": "^1.0.0",
-    "vinyl-source-stream": "^1.1.0"
-  },
-  "dependencies": {
-    "es6-promise": "^2.3.0",
-    "lodash.assign": "^3.2.0",
-    "request": "^2.60.0",
-    "xml2js": "^0.4.9"
-  },
-  "readme": "# ncbi-eutils\n\nThis package is a JavaScript wrapper for **NCBI's E-utilities API** documented at http://www.ncbi.nlm.nih.gov/books/NBK25500/. It uses  ES6 promises to support \"piping\" to combine successive E-utility calls, e.g. piping `esearch` results to `elink`, then piping its result to `esummary`. This can be used in node (CommonJS) or the browser.\n\n[![npm version](https://badge.fury.io/js/ncbi-eutils.svg)](http://badge.fury.io/js/ncbi-eutils)\n[![npm version](https://img.shields.io/badge/license-MIT-blue.svg)]()\n\n### Usage\nAccess a single eutil:\n```javascript\n  var eutils = require('ncbi-eutils');\n  eutils.esearch({db:'gene', term: 'foxp2[sym] AND human[orgn]'})\n    .then(function(d){console.log(d)}) \n```\n\nBasic data pipelines: `esearch` -> `esummay`\n```javascript\n  eutils.esearch({db:'gene', term: 'ltf[sym] AND human[orgn]'})\n    .then(eutils.esummary)\n    .then(function(d){console.log(d)})\n```\n\nMore complex data pipelines: `esearch` -> `elink` -> `esummary` \n```javascript\n  eutils.esearch({db: 'protein', term: '15718680[UID]'})\n    .then(eutils.elink({dbto:'gene'}))\n    .then(function(d) {\n      //supported eutil parameters can be added like this\n      d.retstart = 5;\n      return eutils.esummary(d);\n    })\n    .then(function (d) {console.log(d)})\n    .catch(function (d) {console.log(d)});\n```\n\n\n### Install\n```javascript\nnpm install --save ncbi-eutils\n```\nor in a browser\n```html\n<script src=\"ncbi-eutils.min.js\"></script>\n<script>\n      var eutils = require('ncbi-eutils');\n      ...\n</script>\n```\n\n## API\n\nAll calls in this package return a promise object. To get the return values, pass a function to .then() or .catch() to get the results and errors, respectively. Alternatively, pass another eutil function to .then() to create a data pipeline. For detailed descriptions of each E-utility, please visit NCBI's documentations.\n\n### eutils.einfo([db])\nIf **db** is specified, return all metadata for that database. Otherwise, return the list of all available NCBI databases. To see a live example of this, go to: http://linjoey.github.io/ncbi-eutils/docs/dbinfo.html.\n\n### eutils.esearch(options)\n> Provides a list of UIDs matching a text query\n\n**options.db** a valid NCBI database name\n\n**options.term** a valid search term\n\n### eutils.esummary(options)\n> Returns document summaries (DocSums) for a list of input UIDs\n\n**options.db** a valid NCBI database name\n\n**options.id** array of ids to pass to esummary e.g ['12345', '67890']. Only required if called as the start of a pipeline.\n\n### eutils.efetch(options)\n> Returns formatted data records for a list of input UIDs\n\n**options.db** a valid NCBI database name\n\n**options.id** array of ids to pass to efetch e.g ['12345', '67890']. Only required if called as the start of a pipeline.\n\n### eutils.elink(options)\n> Returns UIDs linked to an input set of UIDs in either the same or a different Entrez database\n\n**options.dbto** a valid NCBI database name\n\n**options.dbfrom** a valid NCBI database name. Only required if called as the start of a pipeline.\n\n**options.id** array of ids to pass to esummary e.g ['12345', '67890']. Only required if called as the start of a pipeline.\n\n\n\n### Dev Agenda\n- [ ] Fix up efetch to support more user options\n- [x] test complex pipelines e.g. esearch | elink | efetch\n- [ ] implement other eutils: espell, egquery, ecitmatch?\n- [x] implement convenience calls for esearch -> esummary\n- [ ] write test test test\n- [ ] elink-> results dont have auto history server, relinking to other eutils use manual id passing. Implement epost to support large tasks\n\n### NCBI Copyright & Disclaimers\nPlease visit http://www.ncbi.nlm.nih.gov/About/disclaimer.html for NCBI's copyright notice.\n\n## License\nMIT\n",
-  "readmeFilename": "README.md",
-  "gitHead": "51ea68ba4668c3e973793059b3c7fb1f3e8cdc6d",
-  "_id": "ncbi-eutils@0.2.2",
-  "_shasum": "c839485b49f6cef1aeb6851fc7a3fadd050f907d",
-  "_from": "ncbi-eutils@0.2.2"
-}
-
-},{}],53:[function(require,module,exports){
-
-var request = require('./request.js')
-  , Term = require('./term.js')
-  , xml2js = require('xml2js').parseString
-  , assign = require('lodash.assign')
-  , EUTILS_BASE = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/';
-
-function buildQueryParameters(options, ignoreList) {
-  var query = '';
-  for (var prop in options) {
-    if (options.hasOwnProperty(prop) && ignoreList.indexOf(prop) == -1) {
-      query += '&' + prop + '=' + options[prop];
-    }
-  }
-  return query;
-}
-
-function ensureOptionIsSet(options, names, tag) {
-  var msg = 'Invalid arguments supplied to ' + tag;
-  if (options === undefined) {
-    throw new Error(msg);
-  }
-
-  for (var i = 0; i < names.length; ++i) {
-    if (options[names[i]] === undefined) {
-      throw new Error(msg);
-    }
-  }
-}
-
-exports.einfo = function einfo(db) {
-  var requestURL = EUTILS_BASE + 'einfo.fcgi?retmode=json&';
-  if (db !== undefined) {
-    requestURL += 'version=2.0&db=' + db;
-  }
-  return request(requestURL).then(function(res) {
-    return JSON.parse(res);
-  });
-};
-
-exports.esearch = function esearch(userOptions) {
-  ensureOptionIsSet(userOptions, ['db', 'term'], 'esearch');
-
-  var options = assign({
-    retmax: 200
-  }, userOptions);
-
-  var requestURL = EUTILS_BASE + 'esearch.fcgi?retmode=json&usehistory=y';
-  requestURL += buildQueryParameters(options, ['term', 'usehistory', 'retmode']);
-  requestURL += '&term=' + (options.term instanceof Term ? options.term.queryText : options.term);
-
-  return request(requestURL).then(function(res) {
-    var jsonRes = JSON.parse(res);
-    jsonRes.db = options.db;
-
-    if (jsonRes.esearchresult.count <= options.retmax) {
-      jsonRes.id = jsonRes.esearchresult.idlist;
-    }
-
-    return jsonRes;
-  });
-};
-
-function makeRequest(requestURL) {
-  return request(requestURL).then(function(res) {
-    return new Promise(function(resolve, reject) {
-      xml2js(res, {explicitArray:false}, function(err, result) {
-        if (!err) {
-          resolve(result);
-        } else {
-          reject(err);
-        }
-      });
-    });
-  });
-}
-exports.esummary = function summary(options) {
-  ensureOptionIsSet(options, ['db'], 'esummary');
-
-  var requestURL = EUTILS_BASE + 'esummary.fcgi?';
-  requestURL += buildQueryParameters(options, ['esearchresult', 'header']);
-
-  if (options.id === undefined) {
-    requestURL += '&query_key=' + options.esearchresult.querykey;
-    requestURL += '&webenv=' + options.esearchresult.webenv;
-  }
-
-  return makeRequest(requestURL);
-};
-
-function getWebenvKeysForURL(options) {
-  var url = '';
-  if (options.esearchresult !== undefined) {
-    url += '&query_key=' + options.esearchresult.querykey;
-    url += '&webenv=' + options.esearchresult.webenv;
-  }
-  return url;
-}
-
-//TODO enhance to support rettype and retmode
-//http://www.ncbi.nlm.nih.gov/books/NBK25499/table/chapter4.T._valid_values_of__retmode_and/?report=objectonly
-exports.efetch = function efetch(options) {
-  ensureOptionIsSet(options, ['db'], 'efetch');
-
-  var requestURL = EUTILS_BASE + 'efetch.fcgi?retmode=xml';
-  requestURL += buildQueryParameters(options, ['retmode', 'esearchresult', 'header']);
-  requestURL += getWebenvKeysForURL(options);
-
-  return makeRequest(requestURL);
-};
-
-exports.elink = function(userOptions) {
-
-  return function elink(options) {
-    options = assign(options, userOptions);
-
-    if (options.header && (options.header.type === 'esearch' || options.header.type === 'elink')) {
-      options.dbfrom = options.db;
-    }
-
-    options.db = options.dbto;
-
-    ensureOptionIsSet(options, ['dbfrom','dbto'], 'elink');
-
-    var requestURL = EUTILS_BASE + 'elink.fcgi?retmode=json';
-    requestURL += buildQueryParameters(options, ['retmode', 'esearchresult', 'header']);
-    requestURL += getWebenvKeysForURL(options);
-
-    return request(requestURL).then(function(res) {
-      var jsonRes = JSON.parse(res);
-      jsonRes.db = options.db;
-      jsonRes.id = jsonRes.linksets[0].linksetdbs[0].links;
-      return jsonRes;
-    });
-  };
-};
-},{"./request.js":55,"./term.js":56,"lodash.assign":41,"xml2js":59}],54:[function(require,module,exports){
-
-
-var version = require('../package.json').version
-  , Term = require('./term.js')
-  , eutilsAPI = require('./core-utils');
-
-eutilsAPI.version = version;
-
-eutilsAPI.buildSearchTerm = function buildSearchTerm(value, field) {
-  return new Term(value, field);
-};
-
-eutilsAPI.search = function(db, term) {
-  var eopts = {
-    db: db,
-    term: term
-  };
-
-  if (arguments.length == 1 && typeof arguments[0] === 'object') {
-    eopts = arguments[0];
-  }
-  return eutilsAPI.esearch(eopts).then(eutilsAPI.esummary);
-};
-
-
-module.exports = eutilsAPI;
-},{"../package.json":52,"./core-utils":53,"./term.js":56}],55:[function(require,module,exports){
-
-var http = require('http');
-var Promise = require('es6-promise').Promise;
-
-function request(url) {
-  return new Promise(function(resolve, reject) {
-    var body = '';
-    http.get(url, function(res) {
-      if (res.statusCode === 200) {
-        res.on('data', function(chunk) {
-          body += chunk;
-        });
-        res.on('end', function() {
-          resolve(body);
-        })
-      } else {
-        reject(res.statusMessage);
-      }
-    })
-  });
-}
-
-module.exports = request;
-
-
-},{"es6-promise":40,"http":28}],56:[function(require,module,exports){
-/**
- * Class Term
- */
-var Term = (function() {
-  function _attachField (op, value, field) {
-    if (op !== undefined) {
-      this.queryText += ' ' + op + ' ';
-    }
-
-    this.queryText += value;
-
-    if (field !== undefined) {
-      this.queryText += '[' + field + ']';
-    }
-  }
-
-  function _termConstructor(value, field) {
-    var _this = this;
-    _this.queryText = '';
-    _this.termAdded = false;
-
-    if (value !== undefined) {
-      _attachField.call(_this, undefined, value, field);
-    }
-
-    Object.defineProperty(_termConstructor.prototype, 'openParen', {
-      get: function() {
-        _this.queryText += '(';
-        return _this;
-      }
-    });
-
-    Object.defineProperty(_termConstructor.prototype, 'closeParen', {
-      get: function() {
-        _this.queryText += ')';
-        return _this;
-      }
-    });
-  }
-
-  _termConstructor.prototype.and = function(value, field) {
-    _attachField.call(this, 'AND', value, field);
-    return this;
-  };
-
-  _termConstructor.prototype.or = function(value, field) {
-    _attachField.call(this, 'OR', value, field);
-    return this;
-  };
-
-  _termConstructor.prototype.not = function(value, field) {
-    _attachField.call(this, 'NOT', value, field);
-    return this;
-  };
-
-  _termConstructor.prototype.range = function(op, range, field) {
-    this.queryText += ' ' + op.toUpperCase() + ' ' + range[0] + '[' + field + ']:' + range[1] + '[' + field + '] ';
-    return this;
-  };
-
-  return _termConstructor;
-})();
-
-module.exports = Term;
-},{}],57:[function(require,module,exports){
 // Generated by CoffeeScript 1.9.2
 (function() {
   var xml2js;
@@ -9108,7 +8810,7 @@ module.exports = Term;
 
 }).call(this);
 
-},{"../lib/xml2js":59}],58:[function(require,module,exports){
+},{"../lib/xml2js":54}],53:[function(require,module,exports){
 // Generated by CoffeeScript 1.9.2
 (function() {
   var prefixMatch;
@@ -9136,7 +8838,7 @@ module.exports = Term;
 
 }).call(this);
 
-},{}],59:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 // Generated by CoffeeScript 1.9.2
 (function() {
   var bom, builder, escapeCDATA, events, isEmpty, processName, processors, requiresCDATA, sax, wrapCDATA,
@@ -9651,7 +9353,7 @@ module.exports = Term;
 
 }).call(this);
 
-},{"./bom":57,"./processors":58,"events":6,"sax":60,"xmlbuilder":77}],60:[function(require,module,exports){
+},{"./bom":52,"./processors":53,"events":6,"sax":55,"xmlbuilder":72}],55:[function(require,module,exports){
 (function (Buffer){
 // wrapper for non-node envs
 ;(function (sax) {
@@ -11066,7 +10768,7 @@ if (!String.fromCodePoint) {
 
 }).call(this,require("buffer").Buffer)
 
-},{"buffer":2,"stream":27,"string_decoder":37}],61:[function(require,module,exports){
+},{"buffer":2,"stream":27,"string_decoder":37}],56:[function(require,module,exports){
 // Generated by CoffeeScript 1.9.1
 (function() {
   var XMLAttribute, create;
@@ -11100,7 +10802,7 @@ if (!String.fromCodePoint) {
 
 }).call(this);
 
-},{"lodash/object/create":131}],62:[function(require,module,exports){
+},{"lodash/object/create":126}],57:[function(require,module,exports){
 // Generated by CoffeeScript 1.9.1
 (function() {
   var XMLBuilder, XMLDeclaration, XMLDocType, XMLElement, XMLStringifier;
@@ -11171,7 +10873,7 @@ if (!String.fromCodePoint) {
 
 }).call(this);
 
-},{"./XMLDeclaration":69,"./XMLDocType":70,"./XMLElement":71,"./XMLStringifier":75}],63:[function(require,module,exports){
+},{"./XMLDeclaration":64,"./XMLDocType":65,"./XMLElement":66,"./XMLStringifier":70}],58:[function(require,module,exports){
 // Generated by CoffeeScript 1.9.1
 (function() {
   var XMLCData, XMLNode, create,
@@ -11222,7 +10924,7 @@ if (!String.fromCodePoint) {
 
 }).call(this);
 
-},{"./XMLNode":72,"lodash/object/create":131}],64:[function(require,module,exports){
+},{"./XMLNode":67,"lodash/object/create":126}],59:[function(require,module,exports){
 // Generated by CoffeeScript 1.9.1
 (function() {
   var XMLComment, XMLNode, create,
@@ -11273,7 +10975,7 @@ if (!String.fromCodePoint) {
 
 }).call(this);
 
-},{"./XMLNode":72,"lodash/object/create":131}],65:[function(require,module,exports){
+},{"./XMLNode":67,"lodash/object/create":126}],60:[function(require,module,exports){
 // Generated by CoffeeScript 1.9.1
 (function() {
   var XMLDTDAttList, create;
@@ -11347,7 +11049,7 @@ if (!String.fromCodePoint) {
 
 }).call(this);
 
-},{"lodash/object/create":131}],66:[function(require,module,exports){
+},{"lodash/object/create":126}],61:[function(require,module,exports){
 // Generated by CoffeeScript 1.9.1
 (function() {
   var XMLDTDElement, create, isArray;
@@ -11401,7 +11103,7 @@ if (!String.fromCodePoint) {
 
 }).call(this);
 
-},{"lodash/lang/isArray":123,"lodash/object/create":131}],67:[function(require,module,exports){
+},{"lodash/lang/isArray":118,"lodash/object/create":126}],62:[function(require,module,exports){
 // Generated by CoffeeScript 1.9.1
 (function() {
   var XMLDTDEntity, create, isObject;
@@ -11491,7 +11193,7 @@ if (!String.fromCodePoint) {
 
 }).call(this);
 
-},{"lodash/lang/isObject":127,"lodash/object/create":131}],68:[function(require,module,exports){
+},{"lodash/lang/isObject":122,"lodash/object/create":126}],63:[function(require,module,exports){
 // Generated by CoffeeScript 1.9.1
 (function() {
   var XMLDTDNotation, create;
@@ -11553,7 +11255,7 @@ if (!String.fromCodePoint) {
 
 }).call(this);
 
-},{"lodash/object/create":131}],69:[function(require,module,exports){
+},{"lodash/object/create":126}],64:[function(require,module,exports){
 // Generated by CoffeeScript 1.9.1
 (function() {
   var XMLDeclaration, XMLNode, create, isObject,
@@ -11628,7 +11330,7 @@ if (!String.fromCodePoint) {
 
 }).call(this);
 
-},{"./XMLNode":72,"lodash/lang/isObject":127,"lodash/object/create":131}],70:[function(require,module,exports){
+},{"./XMLNode":67,"lodash/lang/isObject":122,"lodash/object/create":126}],65:[function(require,module,exports){
 // Generated by CoffeeScript 1.9.1
 (function() {
   var XMLCData, XMLComment, XMLDTDAttList, XMLDTDElement, XMLDTDEntity, XMLDTDNotation, XMLDocType, XMLProcessingInstruction, create, isObject;
@@ -11822,7 +11524,7 @@ if (!String.fromCodePoint) {
 
 }).call(this);
 
-},{"./XMLCData":63,"./XMLComment":64,"./XMLDTDAttList":65,"./XMLDTDElement":66,"./XMLDTDEntity":67,"./XMLDTDNotation":68,"./XMLProcessingInstruction":73,"lodash/lang/isObject":127,"lodash/object/create":131}],71:[function(require,module,exports){
+},{"./XMLCData":58,"./XMLComment":59,"./XMLDTDAttList":60,"./XMLDTDElement":61,"./XMLDTDEntity":62,"./XMLDTDNotation":63,"./XMLProcessingInstruction":68,"lodash/lang/isObject":122,"lodash/object/create":126}],66:[function(require,module,exports){
 // Generated by CoffeeScript 1.9.1
 (function() {
   var XMLAttribute, XMLElement, XMLNode, XMLProcessingInstruction, create, every, isArray, isFunction, isObject,
@@ -12038,7 +11740,7 @@ if (!String.fromCodePoint) {
 
 }).call(this);
 
-},{"./XMLAttribute":61,"./XMLNode":72,"./XMLProcessingInstruction":73,"lodash/collection/every":79,"lodash/lang/isArray":123,"lodash/lang/isFunction":125,"lodash/lang/isObject":127,"lodash/object/create":131}],72:[function(require,module,exports){
+},{"./XMLAttribute":56,"./XMLNode":67,"./XMLProcessingInstruction":68,"lodash/collection/every":74,"lodash/lang/isArray":118,"lodash/lang/isFunction":120,"lodash/lang/isObject":122,"lodash/object/create":126}],67:[function(require,module,exports){
 // Generated by CoffeeScript 1.9.1
 (function() {
   var XMLCData, XMLComment, XMLDeclaration, XMLDocType, XMLElement, XMLNode, XMLRaw, XMLText, isArray, isEmpty, isFunction, isObject,
@@ -12374,7 +12076,7 @@ if (!String.fromCodePoint) {
 
 }).call(this);
 
-},{"./XMLCData":63,"./XMLComment":64,"./XMLDeclaration":69,"./XMLDocType":70,"./XMLElement":71,"./XMLRaw":74,"./XMLText":76,"lodash/lang/isArray":123,"lodash/lang/isEmpty":124,"lodash/lang/isFunction":125,"lodash/lang/isObject":127}],73:[function(require,module,exports){
+},{"./XMLCData":58,"./XMLComment":59,"./XMLDeclaration":64,"./XMLDocType":65,"./XMLElement":66,"./XMLRaw":69,"./XMLText":71,"lodash/lang/isArray":118,"lodash/lang/isEmpty":119,"lodash/lang/isFunction":120,"lodash/lang/isObject":122}],68:[function(require,module,exports){
 // Generated by CoffeeScript 1.9.1
 (function() {
   var XMLProcessingInstruction, create;
@@ -12427,7 +12129,7 @@ if (!String.fromCodePoint) {
 
 }).call(this);
 
-},{"lodash/object/create":131}],74:[function(require,module,exports){
+},{"lodash/object/create":126}],69:[function(require,module,exports){
 // Generated by CoffeeScript 1.9.1
 (function() {
   var XMLNode, XMLRaw, create,
@@ -12478,7 +12180,7 @@ if (!String.fromCodePoint) {
 
 }).call(this);
 
-},{"./XMLNode":72,"lodash/object/create":131}],75:[function(require,module,exports){
+},{"./XMLNode":67,"lodash/object/create":126}],70:[function(require,module,exports){
 // Generated by CoffeeScript 1.9.1
 (function() {
   var XMLStringifier,
@@ -12647,7 +12349,7 @@ if (!String.fromCodePoint) {
 
 }).call(this);
 
-},{}],76:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
 // Generated by CoffeeScript 1.9.1
 (function() {
   var XMLNode, XMLText, create,
@@ -12698,7 +12400,7 @@ if (!String.fromCodePoint) {
 
 }).call(this);
 
-},{"./XMLNode":72,"lodash/object/create":131}],77:[function(require,module,exports){
+},{"./XMLNode":67,"lodash/object/create":126}],72:[function(require,module,exports){
 // Generated by CoffeeScript 1.9.1
 (function() {
   var XMLBuilder, assign;
@@ -12714,7 +12416,7 @@ if (!String.fromCodePoint) {
 
 }).call(this);
 
-},{"./XMLBuilder":62,"lodash/object/assign":130}],78:[function(require,module,exports){
+},{"./XMLBuilder":57,"lodash/object/assign":125}],73:[function(require,module,exports){
 /**
  * Gets the last element of `array`.
  *
@@ -12735,7 +12437,7 @@ function last(array) {
 
 module.exports = last;
 
-},{}],79:[function(require,module,exports){
+},{}],74:[function(require,module,exports){
 var arrayEvery = require('../internal/arrayEvery'),
     baseCallback = require('../internal/baseCallback'),
     baseEvery = require('../internal/baseEvery'),
@@ -12803,7 +12505,7 @@ function every(collection, predicate, thisArg) {
 
 module.exports = every;
 
-},{"../internal/arrayEvery":81,"../internal/baseCallback":85,"../internal/baseEvery":89,"../internal/isIterateeCall":114,"../lang/isArray":123}],80:[function(require,module,exports){
+},{"../internal/arrayEvery":76,"../internal/baseCallback":80,"../internal/baseEvery":84,"../internal/isIterateeCall":109,"../lang/isArray":118}],75:[function(require,module,exports){
 /** Used as the `TypeError` message for "Functions" methods. */
 var FUNC_ERROR_TEXT = 'Expected a function';
 
@@ -12863,7 +12565,7 @@ function restParam(func, start) {
 
 module.exports = restParam;
 
-},{}],81:[function(require,module,exports){
+},{}],76:[function(require,module,exports){
 /**
  * A specialized version of `_.every` for arrays without support for callback
  * shorthands and `this` binding.
@@ -12888,7 +12590,7 @@ function arrayEvery(array, predicate) {
 
 module.exports = arrayEvery;
 
-},{}],82:[function(require,module,exports){
+},{}],77:[function(require,module,exports){
 /**
  * A specialized version of `_.some` for arrays without support for callback
  * shorthands and `this` binding.
@@ -12913,7 +12615,7 @@ function arraySome(array, predicate) {
 
 module.exports = arraySome;
 
-},{}],83:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 var keys = require('../object/keys');
 
 /**
@@ -12947,7 +12649,7 @@ function assignWith(object, source, customizer) {
 
 module.exports = assignWith;
 
-},{"../object/keys":132}],84:[function(require,module,exports){
+},{"../object/keys":127}],79:[function(require,module,exports){
 var baseCopy = require('./baseCopy'),
     keys = require('../object/keys');
 
@@ -12968,7 +12670,7 @@ function baseAssign(object, source) {
 
 module.exports = baseAssign;
 
-},{"../object/keys":132,"./baseCopy":86}],85:[function(require,module,exports){
+},{"../object/keys":127,"./baseCopy":81}],80:[function(require,module,exports){
 var baseMatches = require('./baseMatches'),
     baseMatchesProperty = require('./baseMatchesProperty'),
     bindCallback = require('./bindCallback'),
@@ -13005,7 +12707,7 @@ function baseCallback(func, thisArg, argCount) {
 
 module.exports = baseCallback;
 
-},{"../utility/identity":135,"../utility/property":136,"./baseMatches":96,"./baseMatchesProperty":97,"./bindCallback":102}],86:[function(require,module,exports){
+},{"../utility/identity":130,"../utility/property":131,"./baseMatches":91,"./baseMatchesProperty":92,"./bindCallback":97}],81:[function(require,module,exports){
 /**
  * Copies properties of `source` to `object`.
  *
@@ -13030,7 +12732,7 @@ function baseCopy(source, props, object) {
 
 module.exports = baseCopy;
 
-},{}],87:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 var isObject = require('../lang/isObject');
 
 /**
@@ -13055,7 +12757,7 @@ var baseCreate = (function() {
 
 module.exports = baseCreate;
 
-},{"../lang/isObject":127}],88:[function(require,module,exports){
+},{"../lang/isObject":122}],83:[function(require,module,exports){
 var baseForOwn = require('./baseForOwn'),
     createBaseEach = require('./createBaseEach');
 
@@ -13072,7 +12774,7 @@ var baseEach = createBaseEach(baseForOwn);
 
 module.exports = baseEach;
 
-},{"./baseForOwn":91,"./createBaseEach":104}],89:[function(require,module,exports){
+},{"./baseForOwn":86,"./createBaseEach":99}],84:[function(require,module,exports){
 var baseEach = require('./baseEach');
 
 /**
@@ -13096,7 +12798,7 @@ function baseEvery(collection, predicate) {
 
 module.exports = baseEvery;
 
-},{"./baseEach":88}],90:[function(require,module,exports){
+},{"./baseEach":83}],85:[function(require,module,exports){
 var createBaseFor = require('./createBaseFor');
 
 /**
@@ -13115,7 +12817,7 @@ var baseFor = createBaseFor();
 
 module.exports = baseFor;
 
-},{"./createBaseFor":105}],91:[function(require,module,exports){
+},{"./createBaseFor":100}],86:[function(require,module,exports){
 var baseFor = require('./baseFor'),
     keys = require('../object/keys');
 
@@ -13134,7 +12836,7 @@ function baseForOwn(object, iteratee) {
 
 module.exports = baseForOwn;
 
-},{"../object/keys":132,"./baseFor":90}],92:[function(require,module,exports){
+},{"../object/keys":127,"./baseFor":85}],87:[function(require,module,exports){
 var toObject = require('./toObject');
 
 /**
@@ -13165,7 +12867,7 @@ function baseGet(object, path, pathKey) {
 
 module.exports = baseGet;
 
-},{"./toObject":120}],93:[function(require,module,exports){
+},{"./toObject":115}],88:[function(require,module,exports){
 var baseIsEqualDeep = require('./baseIsEqualDeep'),
     isObject = require('../lang/isObject'),
     isObjectLike = require('./isObjectLike');
@@ -13195,7 +12897,7 @@ function baseIsEqual(value, other, customizer, isLoose, stackA, stackB) {
 
 module.exports = baseIsEqual;
 
-},{"../lang/isObject":127,"./baseIsEqualDeep":94,"./isObjectLike":117}],94:[function(require,module,exports){
+},{"../lang/isObject":122,"./baseIsEqualDeep":89,"./isObjectLike":112}],89:[function(require,module,exports){
 var equalArrays = require('./equalArrays'),
     equalByTag = require('./equalByTag'),
     equalObjects = require('./equalObjects'),
@@ -13299,7 +13001,7 @@ function baseIsEqualDeep(object, other, equalFunc, customizer, isLoose, stackA, 
 
 module.exports = baseIsEqualDeep;
 
-},{"../lang/isArray":123,"../lang/isTypedArray":129,"./equalArrays":106,"./equalByTag":107,"./equalObjects":108}],95:[function(require,module,exports){
+},{"../lang/isArray":118,"../lang/isTypedArray":124,"./equalArrays":101,"./equalByTag":102,"./equalObjects":103}],90:[function(require,module,exports){
 var baseIsEqual = require('./baseIsEqual'),
     toObject = require('./toObject');
 
@@ -13353,7 +13055,7 @@ function baseIsMatch(object, matchData, customizer) {
 
 module.exports = baseIsMatch;
 
-},{"./baseIsEqual":93,"./toObject":120}],96:[function(require,module,exports){
+},{"./baseIsEqual":88,"./toObject":115}],91:[function(require,module,exports){
 var baseIsMatch = require('./baseIsMatch'),
     getMatchData = require('./getMatchData'),
     toObject = require('./toObject');
@@ -13385,7 +13087,7 @@ function baseMatches(source) {
 
 module.exports = baseMatches;
 
-},{"./baseIsMatch":95,"./getMatchData":110,"./toObject":120}],97:[function(require,module,exports){
+},{"./baseIsMatch":90,"./getMatchData":105,"./toObject":115}],92:[function(require,module,exports){
 var baseGet = require('./baseGet'),
     baseIsEqual = require('./baseIsEqual'),
     baseSlice = require('./baseSlice'),
@@ -13432,7 +13134,7 @@ function baseMatchesProperty(path, srcValue) {
 
 module.exports = baseMatchesProperty;
 
-},{"../array/last":78,"../lang/isArray":123,"./baseGet":92,"./baseIsEqual":93,"./baseSlice":100,"./isKey":115,"./isStrictComparable":118,"./toObject":120,"./toPath":121}],98:[function(require,module,exports){
+},{"../array/last":73,"../lang/isArray":118,"./baseGet":87,"./baseIsEqual":88,"./baseSlice":95,"./isKey":110,"./isStrictComparable":113,"./toObject":115,"./toPath":116}],93:[function(require,module,exports){
 /**
  * The base implementation of `_.property` without support for deep paths.
  *
@@ -13448,7 +13150,7 @@ function baseProperty(key) {
 
 module.exports = baseProperty;
 
-},{}],99:[function(require,module,exports){
+},{}],94:[function(require,module,exports){
 var baseGet = require('./baseGet'),
     toPath = require('./toPath');
 
@@ -13469,7 +13171,7 @@ function basePropertyDeep(path) {
 
 module.exports = basePropertyDeep;
 
-},{"./baseGet":92,"./toPath":121}],100:[function(require,module,exports){
+},{"./baseGet":87,"./toPath":116}],95:[function(require,module,exports){
 /**
  * The base implementation of `_.slice` without an iteratee call guard.
  *
@@ -13503,7 +13205,7 @@ function baseSlice(array, start, end) {
 
 module.exports = baseSlice;
 
-},{}],101:[function(require,module,exports){
+},{}],96:[function(require,module,exports){
 /**
  * Converts `value` to a string if it's not one. An empty string is returned
  * for `null` or `undefined` values.
@@ -13518,7 +13220,7 @@ function baseToString(value) {
 
 module.exports = baseToString;
 
-},{}],102:[function(require,module,exports){
+},{}],97:[function(require,module,exports){
 var identity = require('../utility/identity');
 
 /**
@@ -13559,7 +13261,7 @@ function bindCallback(func, thisArg, argCount) {
 
 module.exports = bindCallback;
 
-},{"../utility/identity":135}],103:[function(require,module,exports){
+},{"../utility/identity":130}],98:[function(require,module,exports){
 var bindCallback = require('./bindCallback'),
     isIterateeCall = require('./isIterateeCall'),
     restParam = require('../function/restParam');
@@ -13602,7 +13304,7 @@ function createAssigner(assigner) {
 
 module.exports = createAssigner;
 
-},{"../function/restParam":80,"./bindCallback":102,"./isIterateeCall":114}],104:[function(require,module,exports){
+},{"../function/restParam":75,"./bindCallback":97,"./isIterateeCall":109}],99:[function(require,module,exports){
 var getLength = require('./getLength'),
     isLength = require('./isLength'),
     toObject = require('./toObject');
@@ -13635,7 +13337,7 @@ function createBaseEach(eachFunc, fromRight) {
 
 module.exports = createBaseEach;
 
-},{"./getLength":109,"./isLength":116,"./toObject":120}],105:[function(require,module,exports){
+},{"./getLength":104,"./isLength":111,"./toObject":115}],100:[function(require,module,exports){
 var toObject = require('./toObject');
 
 /**
@@ -13664,7 +13366,7 @@ function createBaseFor(fromRight) {
 
 module.exports = createBaseFor;
 
-},{"./toObject":120}],106:[function(require,module,exports){
+},{"./toObject":115}],101:[function(require,module,exports){
 var arraySome = require('./arraySome');
 
 /**
@@ -13717,7 +13419,7 @@ function equalArrays(array, other, equalFunc, customizer, isLoose, stackA, stack
 
 module.exports = equalArrays;
 
-},{"./arraySome":82}],107:[function(require,module,exports){
+},{"./arraySome":77}],102:[function(require,module,exports){
 /** `Object#toString` result references. */
 var boolTag = '[object Boolean]',
     dateTag = '[object Date]',
@@ -13767,7 +13469,7 @@ function equalByTag(object, other, tag) {
 
 module.exports = equalByTag;
 
-},{}],108:[function(require,module,exports){
+},{}],103:[function(require,module,exports){
 var keys = require('../object/keys');
 
 /** Used for native method references. */
@@ -13836,7 +13538,7 @@ function equalObjects(object, other, equalFunc, customizer, isLoose, stackA, sta
 
 module.exports = equalObjects;
 
-},{"../object/keys":132}],109:[function(require,module,exports){
+},{"../object/keys":127}],104:[function(require,module,exports){
 var baseProperty = require('./baseProperty');
 
 /**
@@ -13853,7 +13555,7 @@ var getLength = baseProperty('length');
 
 module.exports = getLength;
 
-},{"./baseProperty":98}],110:[function(require,module,exports){
+},{"./baseProperty":93}],105:[function(require,module,exports){
 var isStrictComparable = require('./isStrictComparable'),
     pairs = require('../object/pairs');
 
@@ -13876,7 +13578,7 @@ function getMatchData(object) {
 
 module.exports = getMatchData;
 
-},{"../object/pairs":134,"./isStrictComparable":118}],111:[function(require,module,exports){
+},{"../object/pairs":129,"./isStrictComparable":113}],106:[function(require,module,exports){
 var isNative = require('../lang/isNative');
 
 /**
@@ -13894,7 +13596,7 @@ function getNative(object, key) {
 
 module.exports = getNative;
 
-},{"../lang/isNative":126}],112:[function(require,module,exports){
+},{"../lang/isNative":121}],107:[function(require,module,exports){
 var getLength = require('./getLength'),
     isLength = require('./isLength');
 
@@ -13911,7 +13613,7 @@ function isArrayLike(value) {
 
 module.exports = isArrayLike;
 
-},{"./getLength":109,"./isLength":116}],113:[function(require,module,exports){
+},{"./getLength":104,"./isLength":111}],108:[function(require,module,exports){
 /** Used to detect unsigned integer values. */
 var reIsUint = /^\d+$/;
 
@@ -13937,7 +13639,7 @@ function isIndex(value, length) {
 
 module.exports = isIndex;
 
-},{}],114:[function(require,module,exports){
+},{}],109:[function(require,module,exports){
 var isArrayLike = require('./isArrayLike'),
     isIndex = require('./isIndex'),
     isObject = require('../lang/isObject');
@@ -13967,7 +13669,7 @@ function isIterateeCall(value, index, object) {
 
 module.exports = isIterateeCall;
 
-},{"../lang/isObject":127,"./isArrayLike":112,"./isIndex":113}],115:[function(require,module,exports){
+},{"../lang/isObject":122,"./isArrayLike":107,"./isIndex":108}],110:[function(require,module,exports){
 var isArray = require('../lang/isArray'),
     toObject = require('./toObject');
 
@@ -13997,7 +13699,7 @@ function isKey(value, object) {
 
 module.exports = isKey;
 
-},{"../lang/isArray":123,"./toObject":120}],116:[function(require,module,exports){
+},{"../lang/isArray":118,"./toObject":115}],111:[function(require,module,exports){
 /**
  * Used as the [maximum length](http://ecma-international.org/ecma-262/6.0/#sec-number.max_safe_integer)
  * of an array-like value.
@@ -14019,7 +13721,7 @@ function isLength(value) {
 
 module.exports = isLength;
 
-},{}],117:[function(require,module,exports){
+},{}],112:[function(require,module,exports){
 /**
  * Checks if `value` is object-like.
  *
@@ -14033,7 +13735,7 @@ function isObjectLike(value) {
 
 module.exports = isObjectLike;
 
-},{}],118:[function(require,module,exports){
+},{}],113:[function(require,module,exports){
 var isObject = require('../lang/isObject');
 
 /**
@@ -14050,7 +13752,7 @@ function isStrictComparable(value) {
 
 module.exports = isStrictComparable;
 
-},{"../lang/isObject":127}],119:[function(require,module,exports){
+},{"../lang/isObject":122}],114:[function(require,module,exports){
 var isArguments = require('../lang/isArguments'),
     isArray = require('../lang/isArray'),
     isIndex = require('./isIndex'),
@@ -14093,7 +13795,7 @@ function shimKeys(object) {
 
 module.exports = shimKeys;
 
-},{"../lang/isArguments":122,"../lang/isArray":123,"../object/keysIn":133,"./isIndex":113,"./isLength":116}],120:[function(require,module,exports){
+},{"../lang/isArguments":117,"../lang/isArray":118,"../object/keysIn":128,"./isIndex":108,"./isLength":111}],115:[function(require,module,exports){
 var isObject = require('../lang/isObject');
 
 /**
@@ -14109,7 +13811,7 @@ function toObject(value) {
 
 module.exports = toObject;
 
-},{"../lang/isObject":127}],121:[function(require,module,exports){
+},{"../lang/isObject":122}],116:[function(require,module,exports){
 var baseToString = require('./baseToString'),
     isArray = require('../lang/isArray');
 
@@ -14139,7 +13841,7 @@ function toPath(value) {
 
 module.exports = toPath;
 
-},{"../lang/isArray":123,"./baseToString":101}],122:[function(require,module,exports){
+},{"../lang/isArray":118,"./baseToString":96}],117:[function(require,module,exports){
 var isArrayLike = require('../internal/isArrayLike'),
     isObjectLike = require('../internal/isObjectLike');
 
@@ -14175,7 +13877,7 @@ function isArguments(value) {
 
 module.exports = isArguments;
 
-},{"../internal/isArrayLike":112,"../internal/isObjectLike":117}],123:[function(require,module,exports){
+},{"../internal/isArrayLike":107,"../internal/isObjectLike":112}],118:[function(require,module,exports){
 var getNative = require('../internal/getNative'),
     isLength = require('../internal/isLength'),
     isObjectLike = require('../internal/isObjectLike');
@@ -14217,7 +13919,7 @@ var isArray = nativeIsArray || function(value) {
 
 module.exports = isArray;
 
-},{"../internal/getNative":111,"../internal/isLength":116,"../internal/isObjectLike":117}],124:[function(require,module,exports){
+},{"../internal/getNative":106,"../internal/isLength":111,"../internal/isObjectLike":112}],119:[function(require,module,exports){
 var isArguments = require('./isArguments'),
     isArray = require('./isArray'),
     isArrayLike = require('../internal/isArrayLike'),
@@ -14266,7 +13968,7 @@ function isEmpty(value) {
 
 module.exports = isEmpty;
 
-},{"../internal/isArrayLike":112,"../internal/isObjectLike":117,"../object/keys":132,"./isArguments":122,"./isArray":123,"./isFunction":125,"./isString":128}],125:[function(require,module,exports){
+},{"../internal/isArrayLike":107,"../internal/isObjectLike":112,"../object/keys":127,"./isArguments":117,"./isArray":118,"./isFunction":120,"./isString":123}],120:[function(require,module,exports){
 var isObject = require('./isObject');
 
 /** `Object#toString` result references. */
@@ -14306,7 +14008,7 @@ function isFunction(value) {
 
 module.exports = isFunction;
 
-},{"./isObject":127}],126:[function(require,module,exports){
+},{"./isObject":122}],121:[function(require,module,exports){
 var isFunction = require('./isFunction'),
     isObjectLike = require('../internal/isObjectLike');
 
@@ -14356,7 +14058,7 @@ function isNative(value) {
 
 module.exports = isNative;
 
-},{"../internal/isObjectLike":117,"./isFunction":125}],127:[function(require,module,exports){
+},{"../internal/isObjectLike":112,"./isFunction":120}],122:[function(require,module,exports){
 /**
  * Checks if `value` is the [language type](https://es5.github.io/#x8) of `Object`.
  * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
@@ -14386,7 +14088,7 @@ function isObject(value) {
 
 module.exports = isObject;
 
-},{}],128:[function(require,module,exports){
+},{}],123:[function(require,module,exports){
 var isObjectLike = require('../internal/isObjectLike');
 
 /** `Object#toString` result references. */
@@ -14423,7 +14125,7 @@ function isString(value) {
 
 module.exports = isString;
 
-},{"../internal/isObjectLike":117}],129:[function(require,module,exports){
+},{"../internal/isObjectLike":112}],124:[function(require,module,exports){
 var isLength = require('../internal/isLength'),
     isObjectLike = require('../internal/isObjectLike');
 
@@ -14499,7 +14201,7 @@ function isTypedArray(value) {
 
 module.exports = isTypedArray;
 
-},{"../internal/isLength":116,"../internal/isObjectLike":117}],130:[function(require,module,exports){
+},{"../internal/isLength":111,"../internal/isObjectLike":112}],125:[function(require,module,exports){
 var assignWith = require('../internal/assignWith'),
     baseAssign = require('../internal/baseAssign'),
     createAssigner = require('../internal/createAssigner');
@@ -14544,7 +14246,7 @@ var assign = createAssigner(function(object, source, customizer) {
 
 module.exports = assign;
 
-},{"../internal/assignWith":83,"../internal/baseAssign":84,"../internal/createAssigner":103}],131:[function(require,module,exports){
+},{"../internal/assignWith":78,"../internal/baseAssign":79,"../internal/createAssigner":98}],126:[function(require,module,exports){
 var baseAssign = require('../internal/baseAssign'),
     baseCreate = require('../internal/baseCreate'),
     isIterateeCall = require('../internal/isIterateeCall');
@@ -14593,7 +14295,7 @@ function create(prototype, properties, guard) {
 
 module.exports = create;
 
-},{"../internal/baseAssign":84,"../internal/baseCreate":87,"../internal/isIterateeCall":114}],132:[function(require,module,exports){
+},{"../internal/baseAssign":79,"../internal/baseCreate":82,"../internal/isIterateeCall":109}],127:[function(require,module,exports){
 var getNative = require('../internal/getNative'),
     isArrayLike = require('../internal/isArrayLike'),
     isObject = require('../lang/isObject'),
@@ -14640,7 +14342,7 @@ var keys = !nativeKeys ? shimKeys : function(object) {
 
 module.exports = keys;
 
-},{"../internal/getNative":111,"../internal/isArrayLike":112,"../internal/shimKeys":119,"../lang/isObject":127}],133:[function(require,module,exports){
+},{"../internal/getNative":106,"../internal/isArrayLike":107,"../internal/shimKeys":114,"../lang/isObject":122}],128:[function(require,module,exports){
 var isArguments = require('../lang/isArguments'),
     isArray = require('../lang/isArray'),
     isIndex = require('../internal/isIndex'),
@@ -14706,7 +14408,7 @@ function keysIn(object) {
 
 module.exports = keysIn;
 
-},{"../internal/isIndex":113,"../internal/isLength":116,"../lang/isArguments":122,"../lang/isArray":123,"../lang/isObject":127}],134:[function(require,module,exports){
+},{"../internal/isIndex":108,"../internal/isLength":111,"../lang/isArguments":117,"../lang/isArray":118,"../lang/isObject":122}],129:[function(require,module,exports){
 var keys = require('./keys'),
     toObject = require('../internal/toObject');
 
@@ -14741,7 +14443,7 @@ function pairs(object) {
 
 module.exports = pairs;
 
-},{"../internal/toObject":120,"./keys":132}],135:[function(require,module,exports){
+},{"../internal/toObject":115,"./keys":127}],130:[function(require,module,exports){
 /**
  * This method returns the first argument provided to it.
  *
@@ -14763,7 +14465,7 @@ function identity(value) {
 
 module.exports = identity;
 
-},{}],136:[function(require,module,exports){
+},{}],131:[function(require,module,exports){
 var baseProperty = require('../internal/baseProperty'),
     basePropertyDeep = require('../internal/basePropertyDeep'),
     isKey = require('../internal/isKey');
@@ -14796,7 +14498,305 @@ function property(path) {
 
 module.exports = property;
 
-},{"../internal/baseProperty":98,"../internal/basePropertyDeep":99,"../internal/isKey":115}],137:[function(require,module,exports){
+},{"../internal/baseProperty":93,"../internal/basePropertyDeep":94,"../internal/isKey":110}],132:[function(require,module,exports){
+module.exports={
+  "name": "ncbi-eutils",
+  "version": "0.2.2",
+  "description": "NCBI E-utilities API for JavaScript (Node + Browser)",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "gulp test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://linjoey@github.com/linjoey/ncbi-eutils.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/linjoey/ncbi-eutils/issues"
+  },
+  "homepage": "https://github.com/linjoey/ncbi-eutils#readme",
+  "devDependencies": {
+    "browserify": "^11.0.0",
+    "gulp": "^3.9.0",
+    "gulp-concat": "^2.6.0",
+    "gulp-mocha": "^2.1.3",
+    "gulp-sourcemaps": "^1.5.2",
+    "gulp-uglify": "^1.2.0",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0"
+  },
+  "dependencies": {
+    "es6-promise": "^2.3.0",
+    "lodash.assign": "^3.2.0",
+    "request": "^2.60.0",
+    "xml2js": "^0.4.9"
+  },
+  "readme": "# ncbi-eutils\n\nThis package is a JavaScript wrapper for **NCBI's E-utilities API** documented at http://www.ncbi.nlm.nih.gov/books/NBK25500/. It uses  ES6 promises to support \"piping\" to combine successive E-utility calls, e.g. piping `esearch` results to `elink`, then piping its result to `esummary`. This can be used in node (CommonJS) or the browser.\n\n[![npm version](https://badge.fury.io/js/ncbi-eutils.svg)](http://badge.fury.io/js/ncbi-eutils)\n[![npm version](https://img.shields.io/badge/license-MIT-blue.svg)]()\n\n### Usage\nAccess a single eutil:\n```javascript\n  var eutils = require('ncbi-eutils');\n  eutils.esearch({db:'gene', term: 'foxp2[sym] AND human[orgn]'})\n    .then(function(d){console.log(d)}) \n```\n\nBasic data pipelines: `esearch` -> `esummay`\n```javascript\n  eutils.esearch({db:'gene', term: 'ltf[sym] AND human[orgn]'})\n    .then(eutils.esummary)\n    .then(function(d){console.log(d)})\n```\n\nMore complex data pipelines: `esearch` -> `elink` -> `esummary` \n```javascript\n  eutils.esearch({db: 'protein', term: '15718680[UID]'})\n    .then(eutils.elink({dbto:'gene'}))\n    .then(function(d) {\n      //supported eutil parameters can be added like this\n      d.retstart = 5;\n      return eutils.esummary(d);\n    })\n    .then(function (d) {console.log(d)})\n    .catch(function (d) {console.log(d)});\n```\n\n\n### Install\n```javascript\nnpm install --save ncbi-eutils\n```\nor in a browser\n```html\n<script src=\"ncbi-eutils.min.js\"></script>\n<script>\n      var eutils = require('ncbi-eutils');\n      ...\n</script>\n```\n\n## API\n\nAll calls in this package return a promise object. To get the return values, pass a function to .then() or .catch() to get the results and errors, respectively. Alternatively, pass another eutil function to .then() to create a data pipeline. For detailed descriptions of each E-utility, please visit NCBI's documentations.\n\n### eutils.einfo([db])\nIf **db** is specified, return all metadata for that database. Otherwise, return the list of all available NCBI databases. To see a live example of this, go to: http://linjoey.github.io/ncbi-eutils/docs/dbinfo.html.\n\n### eutils.esearch(options)\n> Provides a list of UIDs matching a text query\n\n**options.db** a valid NCBI database name\n\n**options.term** a valid search term\n\n### eutils.esummary(options)\n> Returns document summaries (DocSums) for a list of input UIDs\n\n**options.db** a valid NCBI database name\n\n**options.id** array of ids to pass to esummary e.g ['12345', '67890']. Only required if called as the start of a pipeline.\n\n### eutils.efetch(options)\n> Returns formatted data records for a list of input UIDs\n\n**options.db** a valid NCBI database name\n\n**options.id** array of ids to pass to efetch e.g ['12345', '67890']. Only required if called as the start of a pipeline.\n\n### eutils.elink(options)\n> Returns UIDs linked to an input set of UIDs in either the same or a different Entrez database\n\n**options.dbto** a valid NCBI database name\n\n**options.dbfrom** a valid NCBI database name. Only required if called as the start of a pipeline.\n\n**options.id** array of ids to pass to esummary e.g ['12345', '67890']. Only required if called as the start of a pipeline.\n\n\n\n### Dev Agenda\n- [ ] Fix up efetch to support more user options\n- [x] test complex pipelines e.g. esearch | elink | efetch\n- [ ] implement other eutils: espell, egquery, ecitmatch?\n- [x] implement convenience calls for esearch -> esummary\n- [ ] write test test test\n- [ ] elink-> results dont have auto history server, relinking to other eutils use manual id passing. Implement epost to support large tasks\n\n### NCBI Copyright & Disclaimers\nPlease visit http://www.ncbi.nlm.nih.gov/About/disclaimer.html for NCBI's copyright notice.\n\n## License\nMIT\n",
+  "readmeFilename": "README.md",
+  "gitHead": "51ea68ba4668c3e973793059b3c7fb1f3e8cdc6d",
+  "_id": "ncbi-eutils@0.2.2",
+  "_shasum": "c839485b49f6cef1aeb6851fc7a3fadd050f907d",
+  "_from": "ncbi-eutils@>=0.2.1 <0.3.0"
+}
+
+},{}],133:[function(require,module,exports){
+
+var request = require('./request.js')
+  , Term = require('./term.js')
+  , xml2js = require('xml2js').parseString
+  , assign = require('lodash.assign')
+  , EUTILS_BASE = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/';
+
+function buildQueryParameters(options, ignoreList) {
+  var query = '';
+  for (var prop in options) {
+    if (options.hasOwnProperty(prop) && ignoreList.indexOf(prop) == -1) {
+      query += '&' + prop + '=' + options[prop];
+    }
+  }
+  return query;
+}
+
+function ensureOptionIsSet(options, names, tag) {
+  var msg = 'Invalid arguments supplied to ' + tag;
+  if (options === undefined) {
+    throw new Error(msg);
+  }
+
+  for (var i = 0; i < names.length; ++i) {
+    if (options[names[i]] === undefined) {
+      throw new Error(msg);
+    }
+  }
+}
+
+exports.einfo = function einfo(db) {
+  var requestURL = EUTILS_BASE + 'einfo.fcgi?retmode=json&';
+  if (db !== undefined) {
+    requestURL += 'version=2.0&db=' + db;
+  }
+  return request(requestURL).then(function(res) {
+    return JSON.parse(res);
+  });
+};
+
+exports.esearch = function esearch(userOptions) {
+  ensureOptionIsSet(userOptions, ['db', 'term'], 'esearch');
+
+  var options = assign({
+    retmax: 200
+  }, userOptions);
+
+  var requestURL = EUTILS_BASE + 'esearch.fcgi?retmode=json&usehistory=y';
+  requestURL += buildQueryParameters(options, ['term', 'usehistory', 'retmode']);
+  requestURL += '&term=' + (options.term instanceof Term ? options.term.queryText : options.term);
+
+  return request(requestURL).then(function(res) {
+    var jsonRes = JSON.parse(res);
+    jsonRes.db = options.db;
+
+    if (jsonRes.esearchresult.count <= options.retmax) {
+      jsonRes.id = jsonRes.esearchresult.idlist;
+    }
+
+    return jsonRes;
+  });
+};
+
+function makeRequest(requestURL) {
+  return request(requestURL).then(function(res) {
+    return new Promise(function(resolve, reject) {
+      xml2js(res, {explicitArray:false}, function(err, result) {
+        if (!err) {
+          resolve(result);
+        } else {
+          reject(err);
+        }
+      });
+    });
+  });
+}
+exports.esummary = function summary(options) {
+  ensureOptionIsSet(options, ['db'], 'esummary');
+
+  var requestURL = EUTILS_BASE + 'esummary.fcgi?';
+  requestURL += buildQueryParameters(options, ['esearchresult', 'header']);
+
+  if (options.id === undefined) {
+    requestURL += '&query_key=' + options.esearchresult.querykey;
+    requestURL += '&webenv=' + options.esearchresult.webenv;
+  }
+
+  return makeRequest(requestURL);
+};
+
+function getWebenvKeysForURL(options) {
+  var url = '';
+  if (options.esearchresult !== undefined) {
+    url += '&query_key=' + options.esearchresult.querykey;
+    url += '&webenv=' + options.esearchresult.webenv;
+  }
+  return url;
+}
+
+//TODO enhance to support rettype and retmode
+//http://www.ncbi.nlm.nih.gov/books/NBK25499/table/chapter4.T._valid_values_of__retmode_and/?report=objectonly
+exports.efetch = function efetch(options) {
+  ensureOptionIsSet(options, ['db'], 'efetch');
+
+  var requestURL = EUTILS_BASE + 'efetch.fcgi?retmode=xml';
+  requestURL += buildQueryParameters(options, ['retmode', 'esearchresult', 'header']);
+  requestURL += getWebenvKeysForURL(options);
+
+  return makeRequest(requestURL);
+};
+
+exports.elink = function(userOptions) {
+
+  return function elink(options) {
+    options = assign(options, userOptions);
+
+    if (options.header && (options.header.type === 'esearch' || options.header.type === 'elink')) {
+      options.dbfrom = options.db;
+    }
+
+    options.db = options.dbto;
+
+    ensureOptionIsSet(options, ['dbfrom','dbto'], 'elink');
+
+    var requestURL = EUTILS_BASE + 'elink.fcgi?retmode=json';
+    requestURL += buildQueryParameters(options, ['retmode', 'esearchresult', 'header']);
+    requestURL += getWebenvKeysForURL(options);
+
+    return request(requestURL).then(function(res) {
+      var jsonRes = JSON.parse(res);
+      jsonRes.db = options.db;
+      jsonRes.id = jsonRes.linksets[0].linksetdbs[0].links;
+      return jsonRes;
+    });
+  };
+};
+},{"./request.js":135,"./term.js":136,"lodash.assign":41,"xml2js":54}],134:[function(require,module,exports){
+
+
+var version = require('../package.json').version
+  , Term = require('./term.js')
+  , eutilsAPI = require('./core-utils');
+
+eutilsAPI.version = version;
+
+eutilsAPI.buildSearchTerm = function buildSearchTerm(value, field) {
+  return new Term(value, field);
+};
+
+eutilsAPI.search = function(db, term) {
+  var eopts = {
+    db: db,
+    term: term
+  };
+
+  if (arguments.length == 1 && typeof arguments[0] === 'object') {
+    eopts = arguments[0];
+  }
+  return eutilsAPI.esearch(eopts).then(eutilsAPI.esummary);
+};
+
+
+module.exports = eutilsAPI;
+},{"../package.json":132,"./core-utils":133,"./term.js":136}],135:[function(require,module,exports){
+
+var http = require('http');
+var Promise = require('es6-promise').Promise;
+
+function request(url) {
+  return new Promise(function(resolve, reject) {
+    var body = '';
+    http.get(url, function(res) {
+      if (res.statusCode === 200) {
+        res.on('data', function(chunk) {
+          body += chunk;
+        });
+        res.on('end', function() {
+          resolve(body);
+        })
+      } else {
+        reject(res.statusMessage);
+      }
+    })
+  });
+}
+
+module.exports = request;
+
+
+},{"es6-promise":40,"http":28}],136:[function(require,module,exports){
+/**
+ * Class Term
+ */
+var Term = (function() {
+  function _attachField (op, value, field) {
+    if (op !== undefined) {
+      this.queryText += ' ' + op + ' ';
+    }
+
+    this.queryText += value;
+
+    if (field !== undefined) {
+      this.queryText += '[' + field + ']';
+    }
+  }
+
+  function _termConstructor(value, field) {
+    var _this = this;
+    _this.queryText = '';
+    _this.termAdded = false;
+
+    if (value !== undefined) {
+      _attachField.call(_this, undefined, value, field);
+    }
+
+    Object.defineProperty(_termConstructor.prototype, 'openParen', {
+      get: function() {
+        _this.queryText += '(';
+        return _this;
+      }
+    });
+
+    Object.defineProperty(_termConstructor.prototype, 'closeParen', {
+      get: function() {
+        _this.queryText += ')';
+        return _this;
+      }
+    });
+  }
+
+  _termConstructor.prototype.and = function(value, field) {
+    _attachField.call(this, 'AND', value, field);
+    return this;
+  };
+
+  _termConstructor.prototype.or = function(value, field) {
+    _attachField.call(this, 'OR', value, field);
+    return this;
+  };
+
+  _termConstructor.prototype.not = function(value, field) {
+    _attachField.call(this, 'NOT', value, field);
+    return this;
+  };
+
+  _termConstructor.prototype.range = function(op, range, field) {
+    this.queryText += ' ' + op.toUpperCase() + ' ' + range[0] + '[' + field + ']:' + range[1] + '[' + field + '] ';
+    return this;
+  };
+
+  return _termConstructor;
+})();
+
+module.exports = Term;
+},{}],137:[function(require,module,exports){
 (function (global){
 
 var d3 = (typeof window !== "undefined" ? window['d3'] : typeof global !== "undefined" ? global['d3'] : null);
@@ -15009,12 +15009,11 @@ var browser = (function() {
       target : null,
       width : 1200,
       height : 250,
-      gene: 'foxp2',
       specie : 'human',
       region : {
-        segment: '7',
-        start: '114396300',
-        stop: '114593760'
+        segment: '17',
+        start: '7658401',
+        stop: '7697549'
       }
     }, args);
 
@@ -23964,7 +23963,7 @@ module.exports = genetrack;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
-},{"./gene-manager.js":141,"ncbi-eutils":54}],"genecluster-vis":[function(require,module,exports){
+},{"./gene-manager.js":141,"ncbi-eutils":134}],"genecluster-vis":[function(require,module,exports){
 (function (global){
 
 

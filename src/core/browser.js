@@ -14,12 +14,11 @@ var browser = (function() {
       target : null,
       width : 1200,
       height : 250,
-      gene: 'foxp2',
       specie : 'human',
       region : {
-        segment: '7',
-        start: '114396300',
-        stop: '114593760'
+        segment: '17',
+        start: '7658401',
+        stop: '7697549'
       }
     }, args);
 

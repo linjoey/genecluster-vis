@@ -1,7 +1,7 @@
 {
   "name": "genecluster-vis",
   "version": "0.0.1",
-  "description": "genecluster visual representation",
+  "description": "Interactive gene cluster visual representation for the web",
   "main": "./src/index.js",
   "dependencies": {
     "d3": "^3.5.6",

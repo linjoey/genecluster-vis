@@ -13,21 +13,15 @@
 
 <script>
   var cgv = require('genecluster-vis');
-console.log(cgv.version)
+
   var gc = new cgv({
     target: '#test',
     region : {
-      segment: '1',
-      start: '114386300',
-      stop: '114513760'
+      segment: '17',
+      start: '7658401',
+      stop: '7757549'
     }
   }).render();
-
-//  d3.xml('http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=gene&term=1[chr]+AND+1[CHRPOS]:100000[CHRPOS]+AND+human[ORGAN]', function(e,d) {
-//    //console.log(d);
-//    var a = d3.select(d).select('IdList')
-//    console.log(a)
-//  })
 
 
 
